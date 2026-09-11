@@ -64,17 +64,17 @@
       display: flex; justify-content: space-between; align-items: center;
     }
 
-    .church-info .sub { font-size: 13px; color: var(--primary); font-weight: 700; }
-    .church-info .title { font-size: 20px; font-weight: 700; color: var(--text-main); margin-top: 2px; }
+    .church-info .sub { font-size: 14px; color: var(--primary); font-weight: 700; }
+    .church-info .title { font-size: 21px; font-weight: 700; color: var(--text-main); margin-top: 2px; }
 
     .btn-icon-bg {
       background: #FFF; border: 1px solid #EAE5DE;
-      width: 38px; height: 38px; border-radius: 50%;
+      width: 40px; height: 40px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       color: var(--text-main); cursor: pointer;
     }
     .btn-icon-bg svg {
-      width: 18px; height: 18px; stroke: var(--text-main); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+      width: 20px; height: 20px; stroke: var(--text-main); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
     }
 
     /* 온도 카드 */
@@ -86,24 +86,24 @@
       transition: all 0.3s ease;
     }
     .temp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .temp-title { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 15px; }
+    .temp-title { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 16px; }
     .temp-title svg { width: 18px; height: 18px; stroke: var(--primary); fill: none; stroke-width: 2; }
-    .temp-value { font-size: 20px; font-weight: 700; color: var(--primary); }
+    .temp-value { font-size: 22px; font-weight: 700; color: var(--primary); }
     .progress-bar-bg { width: 100%; height: 8px; background-color: #EFE8E1; border-radius: 4px; overflow: hidden; margin-bottom: 10px; }
     .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #F3A683, var(--primary)); width: 5%; border-radius: 4px; transition: width 0.5s ease; }
     .btn-pray-today {
-      width: 100%; padding: 10px; border: none; border-radius: 10px;
-      background-color: var(--primary); color: white; font-size: 14px; font-weight: 700;
-      display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;
+      width: 100%; padding: 11px; border: none; border-radius: 10px;
+      background-color: var(--primary); color: white; font-size: 15px; font-weight: 700;
+      display: flex; align-items: center; justify-content: justify; gap: 6px; cursor: pointer; justify-content: center;
     }
     .btn-pray-today svg { width: 18px; height: 18px; stroke: white; fill: none; stroke-width: 2; }
 
     .view-section { padding: 0 20px 30px; flex: 1; }
     .section-label {
-      font-size: 14px; font-weight: 700; margin: 12px 0 10px; color: var(--text-sub);
+      font-size: 15px; font-weight: 700; margin: 12px 0 10px; color: var(--text-sub);
       display: flex; align-items: center; gap: 6px;
     }
-    .section-label svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+    .section-label svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
 
     .member-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .member-card {
@@ -118,25 +118,25 @@
     }
 
     .member-info { display: flex; align-items: center; gap: 6px; }
-    .member-name { font-size: 16px; font-weight: 700; color: var(--text-main); }
+    .member-name { font-size: 18px; font-weight: 700; color: var(--text-main); }
     .badge-role {
-      font-size: 10px; font-weight: 700; color: var(--leader-gold);
+      font-size: 11px; font-weight: 700; color: var(--leader-gold);
       background-color: var(--leader-bg); padding: 2px 5px; border-radius: 4px;
     }
-    .member-count { font-size: 12px; color: var(--text-sub); background: var(--bg); padding: 3px 6px; border-radius: 8px; }
+    .member-count { font-size: 13px; color: var(--text-sub); background: var(--bg); padding: 3px 7px; border-radius: 8px; }
 
     /* 상세 화면 및 그룹 박스 */
     .detail-view { display: none; flex-direction: column; flex: 1; padding: 0 20px 30px; }
     .nav-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .btn-back { display: flex; align-items: center; gap: 4px; background: none; border: none; font-size: 15px; font-weight: 700; color: var(--text-sub); cursor: pointer; }
+    .btn-back { display: flex; align-items: center; gap: 4px; background: none; border: none; font-size: 16px; font-weight: 700; color: var(--text-sub); cursor: pointer; }
     .btn-back svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
-    .current-member-title { font-size: 20px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 6px; }
-    .current-member-title svg { width: 22px; height: 22px; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .current-member-title { font-size: 22px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 6px; }
+    .current-member-title svg { width: 24px; height: 24px; fill: none; stroke-width: 2; }
 
     .group-tag {
-      display: inline-block; font-size: 12px; font-weight: 700;
+      display: inline-block; font-size: 13px; font-weight: 700;
       color: var(--primary); background-color: var(--primary-light);
-      padding: 3px 8px; border-radius: 6px; margin-bottom: 8px;
+      padding: 4px 9px; border-radius: 6px; margin-bottom: 8px;
     }
 
     .prayer-group { 
@@ -162,8 +162,8 @@
     .prayer-group.is-urgent .prayer-item { border-bottom-color: #FECACA; }
     
     .prayer-title-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .prayer-title { font-size: 16px; font-weight: 700; color: var(--text-main); }
-    .prayer-detail { font-size: 15px; color: var(--text-sub); line-height: 1.5; white-space: pre-line; margin-top: 6px; }
+    .prayer-title { font-size: 18px; font-weight: 700; color: var(--text-main); }
+    .prayer-detail { font-size: 16px; color: var(--text-sub); line-height: 1.55; white-space: pre-line; margin-top: 6px; }
 
     /* 완료 항목 아코디언 */
     .prayer-item.is-done { opacity: 0.75; }
@@ -175,10 +175,10 @@
     .badge-done-container { display: flex; align-items: center; gap: 4px; }
     .badge-done { 
       background-color: #EAF3EA; color: var(--accent-green); 
-      font-size: 11px; font-weight: 700; padding: 3px 6px; border-radius: 6px; white-space: nowrap; 
+      font-size: 12px; font-weight: 700; padding: 3px 6px; border-radius: 6px; white-space: nowrap; 
     }
     .arrow-icon {
-      width: 16px; height: 16px; stroke: var(--text-sub); fill: none; stroke-width: 2;
+      width: 18px; height: 18px; stroke: var(--text-sub); fill: none; stroke-width: 2;
       transition: transform 0.2s ease;
     }
     .accordion-header.open .arrow-icon { transform: rotate(180deg); }
@@ -197,12 +197,15 @@
     .modal-icon { width: 48px; height: 48px; background-color: var(--primary-light); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
     .modal-icon svg { width: 24px; height: 24px; stroke: var(--primary); fill: none; stroke-width: 2; }
     .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
-    .modal-desc { font-size: 14px; color: var(--text-sub); line-height: 1.4; margin-bottom: 18px; }
-    .btn-modal-close { width: 100%; padding: 12px; border: none; background-color: var(--primary); color: white; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer; }
+    .modal-desc { font-size: 15px; color: var(--text-sub); line-height: 1.4; margin-bottom: 18px; }
+    .btn-modal-close { width: 100%; padding: 12px; border: none; background-color: var(--primary); color: white; font-size: 16px; font-weight: 700; border-radius: 12px; cursor: pointer; }
 
-    .font-large .member-name { font-size: 18px; }
-    .font-large .prayer-title { font-size: 18px; }
-    .font-large .prayer-detail { font-size: 16px; }
+    /* 💡 확대 모드 시 적용할 크기 (더 크게 확대) */
+    .font-large .member-name { font-size: 21px; }
+    .font-large .prayer-title { font-size: 21px; }
+    .font-large .prayer-detail { font-size: 19px; }
+    .font-large .group-tag { font-size: 14px; }
+    .font-large .badge-done { font-size: 13px; }
   </style>
 </head>
 <body>
@@ -373,10 +376,9 @@
     const name = orderedMemberList[currentMemberIndex];
     const isLeader = rolesMap[name] === '순장';
 
-    // 💡 순장 아이콘 변경: 따뜻한 수호/돌봄 느낌의 하트-방패 아이콘
     const iconSvg = isLeader 
-      ? `<svg viewBox="0 0 24 24" style="stroke:var(--leader-gold); fill:none;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8a2.5 2.5 0 0 0-2.5 2.5c0 2 2.5 4.5 2.5 4.5s2.5-2.5 2.5-4.5A2.5 2.5 0 0 0 12 8z" fill="var(--leader-gold)"/></svg>`
-      : `<svg viewBox="0 0 24 24" style="stroke:var(--primary); fill:none;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+      ? `<svg viewBox="0 0 24 24" style="stroke:var(--leader-gold)"><path d="m2 4 3 12h14l3-12-6 7-4-5-4 5-6-7z"/><path d="M5 20h14"/></svg>`
+      : `<svg viewBox="0 0 24 24" style="stroke:var(--primary)"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
 
     memberDetailName.innerHTML = `${iconSvg} ${name} ${isLeader ? '순장' : '순원'}`;
     
@@ -480,7 +482,7 @@
   function toggleFontSize() {
     isLargeFont = !isLargeFont;
     document.body.classList.toggle('font-large', isLargeFont);
-    showModal("폰트 크기 변경", isLargeFont ? "글자 크기가 크게 설정되었습니다." : "글자 크기가 기본으로 설정되었습니다.");
+    showModal("글자 크기 변경", isLargeFont ? "글자 크기가 매우 크게 설정되었습니다." : "글자 크기가 기본(선명한 크기)으로 변경되었습니다.");
   }
 
   function initTemperature() {
