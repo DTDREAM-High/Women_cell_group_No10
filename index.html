@@ -148,7 +148,7 @@
       white-space: nowrap;
     }
     
-    /* 🚨 카드 전용 긴급 뱃지 */
+    /* 🚨 카드 전용 우선 뱃지 */
     .badge-urgent-card {
       font-size: 10px; font-weight: 700; color: var(--urgent-red);
       background-color: #FEE2E2; padding: 2px 4px; border-radius: 4px;
@@ -382,8 +382,8 @@
     memberGrid.innerHTML = '';
     orderedMemberList.forEach(name => {
       const isLeader = rolesMap[name] === '순장';
-      // 🚨 긴급 기도제목 포함 여부 확인
-      const hasUrgent = prayerData[name].some(p => p.status === 'urgent' || p.status === '긴급');
+      // 🚨 우선 기도제목 포함 여부 확인
+      const hasUrgent = prayerData[name].some(p => p.status === 'urgent' || p.status === '우선');
       
       memberGrid.appendChild(createMemberCard(name, isLeader, rolesMap[name], hasUrgent));
     });
@@ -401,7 +401,7 @@
         <span class="member-name">${name}</span>
         <div class="member-tags">
           ${isLeader ? `<span class="badge-role">${roleText}</span>` : ''}
-          ${hasUrgent ? `<span class="badge-urgent-card">긴급</span>` : ''}
+          ${hasUrgent ? `<span class="badge-urgent-card">우선</span>` : ''}
         </div>
       </div>
       <span class="member-count">${prayerData[name].length}개</span>
@@ -422,8 +422,8 @@
     
     const prayers = prayerData[name];
     
-    const urgentItems = prayers.filter(p => p.status === 'urgent' || p.status === '긴급');
-    const normalPrayers = prayers.filter(p => p.status !== 'urgent' && p.status !== '긴급');
+    const urgentItems = prayers.filter(p => p.status === 'urgent' || p.status === '우선');
+    const normalPrayers = prayers.filter(p => p.status !== 'urgent' && p.status !== '우선');
 
     const groups = {};
     normalPrayers.forEach(p => {
@@ -438,12 +438,12 @@
       const urgentGroupEl = document.createElement('div');
       urgentGroupEl.className = 'prayer-group is-urgent';
 
-      let urgentHTML = `<div class="group-tag urgent-tag">🚨 긴급 기도</div>`;
+      let urgentHTML = `<div class="group-tag urgent-tag">🚨 우선 기도</div>`;
       urgentItems.forEach(p => {
         urgentHTML += `
           <div class="prayer-item">
             <div class="prayer-title-row">
-              <div class="prayer-title" style="color: var(--urgent-red);">${p.title || '긴급 기도제목'}</div>
+              <div class="prayer-title" style="color: var(--urgent-red);">${p.title || '우선 기도제목'}</div>
             </div>
             <div class="prayer-detail">${p.detail}</div>
           </div>
