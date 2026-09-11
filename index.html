@@ -420,19 +420,24 @@
     showModal("폰트 크기 변경", isLargeFont ? "글자 크기가 크게 설정되었습니다." : "글자 크기가 기본으로 설정되었습니다.");
   }
 
-  function initTemperature() {
+function initTemperature() {
     const lastPrayTime = localStorage.getItem('last_pray_time');
     let streak = parseInt(localStorage.getItem('pray_streak') || '0');
-    let temp = 5;
+    let temp = 5; // 기본 안 했을 때 온도
 
     if (lastPrayTime) {
       const diffHours = (new Date() - new Date(lastPrayTime)) / (1000 * 60 * 60);
-      if (diffHours <= 28) temp = Math.min(100, 37 + streak * 10);
-      else if (diffHours <= 72) temp = 37;
-      else if (diffHours <= 168) temp = 18;
-      else temp = 5;
+      
+      // 36시간 이내 기도 참여 유지 중일 때 (연속 일수에 따라 차츰 상승)
+      if (diffHours <= 36) {
+        temp = Math.min(100, 36.5 + (streak * 3)); // 하루 연속할 때마다 +3도씩 상승
+      } else if (diffHours <= 72) {
+        temp = 36.5; // 하루 미참여시 기본 체온 유지
+      } else {
+        temp = 10; // 오래 미참여시 식음
+      }
     }
-    updateTempUI(temp);
+    updateTempUI(Math.round(temp));
   }
 
   function recordPrayer() {
@@ -442,24 +447,32 @@
 
     if (lastPrayTime) {
       const diffHours = (now - new Date(lastPrayTime)) / (1000 * 60 * 60);
+      
+      // 12시간 이내 재클릭 방지
       if (diffHours < 12) {
-        showModal("기도 완료", "오늘 이미 기도를 완료하셨습니다!\n지속적인 기도로 온도를 유지해보세요.");
+        showModal("기도 완료", "오늘 이미 기도를 완료하셨습니다!\n내일도 함께 기도해주세요.");
         return;
       }
-      if (diffHours <= 36) streak += 1;
-      else streak = 1;
+      
+      if (diffHours <= 36) {
+        streak += 1; // 연속 성공
+      } else {
+        streak = 1; // 연속 끊김 후 재시작
+      }
     } else {
-      streak = 1;
+      streak = 1; // 최초 1회 기도
     }
 
     localStorage.setItem('last_pray_time', now.toISOString());
     localStorage.setItem('pray_streak', streak.toString());
 
-    let temp = Math.min(100, 30 + streak * 10);
-    updateTempUI(temp);
-    showModal("기도 완료 🙏", `오늘의 기도에 함께해주셔서 감사합니다!\n다락방 기도 온도가 ${temp}°C로 올라갔습니다.`);
-  }
+    // 계산식: 기본 36.5도 + (연속일수 * 3도)
+    let temp = Math.min(100, 36.5 + (streak * 3));
+    temp = Math.round(temp);
 
+    updateTempUI(temp);
+    showModal("기도 완료 🙏", `오늘의 기도에 함께해주셔서 감사합니다!\n현재 다락방 기도 온도가 ${temp}°C입니다.`);
+  }
   function updateTempUI(temp) {
     tempDisplay.textContent = `${temp}°C`;
     tempBar.style.width = `${temp}%`;
