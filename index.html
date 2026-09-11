@@ -23,6 +23,9 @@
       --text-main: #2D2926;
       --text-sub: #7A7571;
       --accent-green: #5B8C5A;
+      --urgent-red: #DC2626;
+      --urgent-bg: #FEF2F2;
+      --urgent-border: #FCA5A5;
       --leader-gold: #D97706;
       --leader-bg: #FEF3C7;
       --radius: 16px;
@@ -74,7 +77,7 @@
       width: 18px; height: 18px; stroke: var(--text-main); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
     }
 
-    /* 온도 카드 - 여백 축소 */
+    /* 온도 카드 */
     .temp-card {
       margin: 0 20px 14px;
       background: linear-gradient(135deg, #FFFFFF 0%, #FFF9F6 100%);
@@ -122,7 +125,7 @@
     }
     .member-count { font-size: 12px; color: var(--text-sub); background: var(--bg); padding: 3px 6px; border-radius: 8px; }
 
-    /* 상세 화면 및 컴팩트 박스 */
+    /* 상세 화면 및 그룹 박스 */
     .detail-view { display: none; flex-direction: column; flex: 1; padding: 0 20px 30px; }
     .nav-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
     .btn-back { display: flex; align-items: center; gap: 4px; background: none; border: none; font-size: 15px; font-weight: 700; color: var(--text-sub); cursor: pointer; }
@@ -136,7 +139,6 @@
       padding: 3px 8px; border-radius: 6px; margin-bottom: 8px;
     }
 
-    /* 기도 박스 패딩 축소 적용 (상하 12px) */
     .prayer-group { 
       background-color: var(--card-bg); 
       border-radius: var(--radius); 
@@ -144,29 +146,33 @@
       margin-bottom: 12px; 
       border: 1px solid #EAE5DE; 
     }
+
+    /* 🚨 긴급 기도 박스 전용 스타일 */
+    .prayer-group.is-urgent {
+      background-color: var(--urgent-bg);
+      border: 1.5px solid var(--urgent-border);
+    }
+    .group-tag.urgent-tag {
+      color: var(--urgent-red);
+      background-color: #FEE2E2;
+    }
     
     .prayer-item { padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px dashed #EAE5DE; }
     .prayer-item:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+    .prayer-group.is-urgent .prayer-item { border-bottom-color: #FECACA; }
     
     .prayer-title-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .prayer-title { font-size: 16px; font-weight: 700; color: var(--text-main); }
     .prayer-detail { font-size: 15px; color: var(--text-sub); line-height: 1.5; white-space: pre-line; margin-top: 6px; }
 
-    /* 완료 항목 아코디언 스타일 */
+    /* 완료 항목 아코디언 */
     .prayer-item.is-done { opacity: 0.75; }
     .prayer-item.is-done .prayer-title {
       text-decoration: line-through;
       color: var(--text-sub);
     }
-    .accordion-header {
-      cursor: pointer;
-      user-select: none;
-    }
-    .badge-done-container {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
+    .accordion-header { cursor: pointer; user-select: none; }
+    .badge-done-container { display: flex; align-items: center; gap: 4px; }
     .badge-done { 
       background-color: #EAF3EA; color: var(--accent-green); 
       font-size: 11px; font-weight: 700; padding: 3px 6px; border-radius: 6px; white-space: nowrap; 
@@ -175,16 +181,9 @@
       width: 16px; height: 16px; stroke: var(--text-sub); fill: none; stroke-width: 2;
       transition: transform 0.2s ease;
     }
-    .accordion-header.open .arrow-icon {
-      transform: rotate(180deg);
-    }
-    .accordion-content {
-      display: none;
-      padding-top: 4px;
-    }
-    .accordion-content.open {
-      display: block;
-    }
+    .accordion-header.open .arrow-icon { transform: rotate(180deg); }
+    .accordion-content { display: none; padding-top: 4px; }
+    .accordion-content.open { display: block; }
 
     /* 모달 */
     .modal-overlay {
@@ -341,7 +340,6 @@
       prayerData[item.name].push(item);
     });
 
-    // 💡 구분 없이 가나다 한글 순 정렬
     orderedMemberList = Object.keys(prayerData).sort((a, b) => a.localeCompare(b, 'ko'));
     renderMemberGrid();
   }
@@ -382,8 +380,13 @@
     memberDetailName.innerHTML = `${iconSvg} ${name} ${isLeader ? '순장' : '순원'}`;
     
     const prayers = prayerData[name];
+    
+    // 💡 기도제목 분류 (긴급 기도제목과 일반 그룹 분리)
+    const urgentItems = prayers.filter(p => p.status === 'urgent' || p.status === '긴급');
+    const normalPrayers = prayers.filter(p => p.status !== 'urgent' && p.status !== '긴급');
+
     const groups = {};
-    prayers.forEach(p => {
+    normalPrayers.forEach(p => {
       const gName = p.group || "기도제목";
       if (!groups[gName]) groups[gName] = [];
       groups[gName].push(p);
@@ -391,16 +394,36 @@
 
     prayerContainer.innerHTML = '';
 
+    // 1️⃣ [최상단 배치] 🚨 긴급 기도 항목 영역 생성
+    if (urgentItems.length > 0) {
+      const urgentGroupEl = document.createElement('div');
+      urgentGroupEl.className = 'prayer-group is-urgent';
+
+      let urgentHTML = `<div class="group-tag urgent-tag">🚨 긴급 기도</div>`;
+      urgentItems.forEach(p => {
+        urgentHTML += `
+          <div class="prayer-item">
+            <div class="prayer-title-row">
+              <div class="prayer-title" style="color: var(--urgent-red);">${p.title || '긴급 기도제목'}</div>
+            </div>
+            <div class="prayer-detail">${p.detail}</div>
+          </div>
+        `;
+      });
+      urgentGroupEl.innerHTML = urgentHTML;
+      prayerContainer.appendChild(urgentGroupEl);
+    }
+
+    // 2️⃣ 일반 기도제목 그룹 생성
     Object.keys(groups).forEach(gName => {
       const groupEl = document.createElement('div');
       groupEl.className = 'prayer-group';
 
       let itemsHTML = `<div class="group-tag">📌 ${gName}</div>`;
-      groups[gName].forEach((p, itemIdx) => {
+      groups[gName].forEach(p => {
         const isDone = p.status === 'done' || p.status === '완료' || p.status === '응답완료';
         
         if (isDone) {
-          // 💡 응답 완료 건: 클릭 시 접히고 펼쳐지는 아코디언 구현
           itemsHTML += `
             <div class="prayer-item is-done">
               <div class="prayer-title-row accordion-header" onclick="toggleAccordion(this)">
@@ -416,7 +439,6 @@
             </div>
           `;
         } else {
-          // 일반 상태 기도제목
           itemsHTML += `
             <div class="prayer-item">
               <div class="prayer-title-row">
@@ -432,7 +454,6 @@
       prayerContainer.appendChild(groupEl);
     });
 
-    // 💡 상세화면 전환 시 상단 기도 온도 박스 숨김
     tempCard.style.display = 'none';
     mainView.style.display = 'none';
     detailView.style.display = 'flex';
@@ -448,7 +469,6 @@
   function showMainView() {
     detailView.style.display = 'none';
     mainView.style.display = 'block';
-    // 💡 메인으로 복귀 시 기도 온도 박스 재표시
     tempCard.style.display = 'block';
   }
 
@@ -465,16 +485,15 @@
     showModal("폰트 크기 변경", isLargeFont ? "글자 크기가 크게 설정되었습니다." : "글자 크기가 기본으로 설정되었습니다.");
   }
 
-  /* 💡 온도 로직: 첫 기도 완료 시 정확히 36.5도 시작 */
   function initTemperature() {
     const lastPrayTime = localStorage.getItem('last_pray_time');
     let streak = parseInt(localStorage.getItem('pray_streak') || '0');
-    let temp = 5; // 기도 안 한 기본 상태
+    let temp = 5;
 
     if (lastPrayTime) {
       const diffHours = (new Date() - new Date(lastPrayTime)) / (1000 * 60 * 60);
       if (diffHours <= 36) {
-        temp = 36.5 + ((streak - 1) * 2.5); // 첫 기도는 36.5도, 연속 시 +2.5도씩 상승
+        temp = 36.5 + ((streak - 1) * 2.5);
         temp = Math.min(100, temp);
       } else if (diffHours <= 72) {
         temp = 36.5;
@@ -501,13 +520,12 @@
       if (diffHours <= 36) streak += 1;
       else streak = 1;
     } else {
-      streak = 1; // 최초 기도
+      streak = 1;
     }
 
     localStorage.setItem('last_pray_time', now.toISOString());
     localStorage.setItem('pray_streak', streak.toString());
 
-    // 첫 참여 시 36.5도, 이후 연속 시 2.5도씩 증가
     let temp = 36.5 + ((streak - 1) * 2.5);
     temp = Math.min(100, temp);
 
