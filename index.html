@@ -94,7 +94,7 @@
     .btn-pray-today {
       width: 100%; padding: 11px; border: none; border-radius: 10px;
       background-color: var(--primary); color: white; font-size: 15px; font-weight: 700;
-      display: flex; align-items: center; justify-content: justify; gap: 6px; cursor: pointer; justify-content: center;
+      display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;
     }
     .btn-pray-today svg { width: 18px; height: 18px; stroke: white; fill: none; stroke-width: 2; }
 
@@ -105,25 +105,57 @@
     }
     .section-label svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
 
+    /* 메인 그리드 및 카드 개선 */
     .member-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .member-card {
       background-color: var(--card-bg); border: 1px solid #EAE5DE;
-      border-radius: 12px; padding: 12px 14px;
+      border-radius: 12px; padding: 10px 12px;
       display: flex; align-items: center; justify-content: space-between;
-      cursor: pointer; transition: all 0.2s;
+      cursor: pointer; transition: all 0.2s; min-height: 52px;
     }
     .member-card.is-leader {
       border-color: #FCD34D;
       background: linear-gradient(135deg, #FFF 0%, #FFFBEB 100%);
     }
 
-    .member-info { display: flex; align-items: center; gap: 6px; }
-    .member-name { font-size: 17px; font-weight: 700; color: var(--text-main); }
-    .badge-role {
-      font-size: 11px; font-weight: 700; color: var(--leader-gold);
-      background-color: var(--leader-bg); padding: 2px 5px; border-radius: 4px;
+    .member-info { 
+      display: flex; 
+      align-items: center; 
+      gap: 6px; 
+      flex-wrap: wrap; /* 그리드 파손 방지 */
+      flex: 1;
+      min-width: 0;
     }
-    .member-count { font-size: 13px; color: var(--text-sub); background: var(--bg); padding: 3px 7px; border-radius: 8px; }
+    
+    /* 💡 메인 화면 이름 크기 한 단계 축소 (18px -> 15px) */
+    .member-name { 
+      font-size: 15px; 
+      font-weight: 700; 
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+
+    .member-tags {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      flex-wrap: wrap;
+    }
+
+    .badge-role {
+      font-size: 10px; font-weight: 700; color: var(--leader-gold);
+      background-color: var(--leader-bg); padding: 2px 4px; border-radius: 4px;
+      white-space: nowrap;
+    }
+    
+    /* 🚨 카드 전용 긴급 뱃지 */
+    .badge-urgent-card {
+      font-size: 10px; font-weight: 700; color: var(--urgent-red);
+      background-color: #FEE2E2; padding: 2px 4px; border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .member-count { font-size: 12px; color: var(--text-sub); background: var(--bg); padding: 3px 6px; border-radius: 8px; flex-shrink: 0; }
 
     /* 상세 화면 및 그룹 박스 */
     .detail-view { display: none; flex-direction: column; flex: 1; padding: 0 20px 30px; }
@@ -147,7 +179,6 @@
       border: 1px solid #EAE5DE; 
     }
 
-    /* 🚨 긴급 기도 박스 전용 스타일 */
     .prayer-group.is-urgent {
       background-color: var(--urgent-bg);
       border: 1.5px solid var(--urgent-border);
@@ -200,8 +231,8 @@
     .modal-desc { font-size: 15px; color: var(--text-sub); line-height: 1.4; margin-bottom: 18px; }
     .btn-modal-close { width: 100%; padding: 12px; border: none; background-color: var(--primary); color: white; font-size: 16px; font-weight: 700; border-radius: 12px; cursor: pointer; }
 
-    /* 💡 확대 모드 시 적용할 크기 (더 크게 확대) */
-    .font-large .member-name { font-size: 21px; }
+    /* 확대 모드 시 적용할 크기 */
+    .font-large .member-name { font-size: 18px; }
     .font-large .prayer-title { font-size: 21px; }
     .font-large .prayer-detail { font-size: 19px; }
     .font-large .group-tag { font-size: 14px; }
@@ -351,20 +382,27 @@
     memberGrid.innerHTML = '';
     orderedMemberList.forEach(name => {
       const isLeader = rolesMap[name] === '순장';
-      memberGrid.appendChild(createMemberCard(name, isLeader, rolesMap[name]));
+      // 🚨 긴급 기도제목 포함 여부 확인
+      const hasUrgent = prayerData[name].some(p => p.status === 'urgent' || p.status === '긴급');
+      
+      memberGrid.appendChild(createMemberCard(name, isLeader, rolesMap[name], hasUrgent));
     });
   }
 
-  function createMemberCard(name, isLeader, roleText) {
+  function createMemberCard(name, isLeader, roleText, hasUrgent) {
     const globalIndex = orderedMemberList.indexOf(name);
     const card = document.createElement('div');
     card.className = `member-card ${isLeader ? 'is-leader' : ''}`;
     card.onclick = () => showDetailView(globalIndex);
     
+    // 💡 안전한 태그 정렬 구조 적용 (유연하게 줄바꿈됨)
     card.innerHTML = `
       <div class="member-info">
         <span class="member-name">${name}</span>
-        ${isLeader ? `<span class="badge-role">${roleText}</span>` : ''}
+        <div class="member-tags">
+          ${isLeader ? `<span class="badge-role">${roleText}</span>` : ''}
+          ${hasUrgent ? `<span class="badge-urgent-card">긴급</span>` : ''}
+        </div>
       </div>
       <span class="member-count">${prayerData[name].length}개</span>
     `;
@@ -482,7 +520,7 @@
   function toggleFontSize() {
     isLargeFont = !isLargeFont;
     document.body.classList.toggle('font-large', isLargeFont);
-    showModal("글자 크기 변경", isLargeFont ? "글자 크기가 매우 크게 설정되었습니다." : "글자 크기가 기본(선명한 크기)으로 변경되었습니다.");
+    showModal("글자 크기 변경", isLargeFont ? "글자 크기가 확대되었습니다." : "글자 크기가 기본으로 설정되었습니다.");
   }
 
   function initTemperature() {
