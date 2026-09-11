@@ -131,7 +131,7 @@
     .btn-back { display: flex; align-items: center; gap: 4px; background: none; border: none; font-size: 15px; font-weight: 700; color: var(--text-sub); cursor: pointer; }
     .btn-back svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
     .current-member-title { font-size: 20px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 6px; }
-    .current-member-title svg { width: 22px; height: 22px; fill: none; stroke-width: 2; }
+    .current-member-title svg { width: 22px; height: 22px; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
     .group-tag {
       display: inline-block; font-size: 12px; font-weight: 700;
@@ -373,15 +373,15 @@
     const name = orderedMemberList[currentMemberIndex];
     const isLeader = rolesMap[name] === '순장';
 
+    // 💡 순장 아이콘 변경: 따뜻한 수호/돌봄 느낌의 하트-방패 아이콘
     const iconSvg = isLeader 
-      ? `<svg viewBox="0 0 24 24" style="stroke:var(--leader-gold)"><path d="m2 4 3 12h14l3-12-6 7-4-5-4 5-6-7z"/><path d="M5 20h14"/></svg>`
-      : `<svg viewBox="0 0 24 24" style="stroke:var(--primary)"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+      ? `<svg viewBox="0 0 24 24" style="stroke:var(--leader-gold); fill:none;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8a2.5 2.5 0 0 0-2.5 2.5c0 2 2.5 4.5 2.5 4.5s2.5-2.5 2.5-4.5A2.5 2.5 0 0 0 12 8z" fill="var(--leader-gold)"/></svg>`
+      : `<svg viewBox="0 0 24 24" style="stroke:var(--primary); fill:none;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
 
     memberDetailName.innerHTML = `${iconSvg} ${name} ${isLeader ? '순장' : '순원'}`;
     
     const prayers = prayerData[name];
     
-    // 💡 기도제목 분류 (긴급 기도제목과 일반 그룹 분리)
     const urgentItems = prayers.filter(p => p.status === 'urgent' || p.status === '긴급');
     const normalPrayers = prayers.filter(p => p.status !== 'urgent' && p.status !== '긴급');
 
@@ -394,7 +394,6 @@
 
     prayerContainer.innerHTML = '';
 
-    // 1️⃣ [최상단 배치] 🚨 긴급 기도 항목 영역 생성
     if (urgentItems.length > 0) {
       const urgentGroupEl = document.createElement('div');
       urgentGroupEl.className = 'prayer-group is-urgent';
@@ -414,7 +413,6 @@
       prayerContainer.appendChild(urgentGroupEl);
     }
 
-    // 2️⃣ 일반 기도제목 그룹 생성
     Object.keys(groups).forEach(gName => {
       const groupEl = document.createElement('div');
       groupEl.className = 'prayer-group';
