@@ -415,9 +415,9 @@
     const isLeader = rolesMap[name] === '순장';
 
     const iconSvg = isLeader 
-      ? `<svg viewBox="0 0 24 24" style="stroke:var(--leader-gold)"><path d="m2 4 3 12h14l3-12-6 7-4-5-4 5-6-7z"/><path d="M5 20h14"/></svg>`
-      : `<svg viewBox="0 0 24 24" style="stroke:var(--primary)"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
-
+  ? `<svg viewBox="0 0 24 24" style="stroke:var(--leader-gold); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;"><circle cx="12" cy="12" r="10"/><path d="m12 17.75-6.172 3.245 1.179-6.873-4.994-4.867 6.9-1.002L12 2l3.087 6.253 6.9 1.002-4.994 4.867 1.179 6.873z"/></svg>`
+  : `<svg viewBox="0 0 24 24" style="stroke:var(--primary); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+  
     memberDetailName.innerHTML = `${iconSvg} ${name} ${isLeader ? '순장' : '순원'}`;
     
     const prayers = prayerData[name];
@@ -544,26 +544,39 @@
 
   function recordPrayer() {
     const now = new Date();
-    const lastPrayTime = localStorage.getItem('last_pray_time');
+    // YYYY-MM-DD 형식으로 오늘 날짜 추출
+    const todayStr = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+    
+    const lastPrayDate = localStorage.getItem('last_pray_date');
     let streak = parseInt(localStorage.getItem('pray_streak') || '0');
 
-    if (lastPrayTime) {
-      const diffHours = (now - new Date(lastPrayTime)) / (1000 * 60 * 60);
-      
-      if (diffHours < 12) {
-        showModal("기도 완료", "오늘 이미 기도를 완료하셨습니다!\n내일도 함께 기도해주세요.");
-        return;
+    // 이미 오늘 눌렀는지 확인 (날짜 비교)
+    if (lastPrayDate === todayStr) {
+      showModal("기도 완료", "오늘 이미 기도를 완료하셨습니다!\n내일(밤 12시 이후)에 다시 참여해주세요.");
+      return;
+    }
+
+    // 연속 기도 일수 계산
+    if (lastPrayDate) {
+      const lastDate = new Date(lastPrayDate);
+      const diffTime = Math.abs(now - lastDate);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays <= 2) { 
+        streak += 1; // 어제 누르고 오늘 누른 경우 (연속 성공)
+      } else {
+        streak = 1; // 며칠 쉬었다가 누른 경우 초기화
       }
-      
-      if (diffHours <= 36) streak += 1;
-      else streak = 1;
     } else {
       streak = 1;
     }
 
-    localStorage.setItem('last_pray_time', now.toISOString());
+    // 정보 저장
+    localStorage.getItem('last_pray_time', now.toISOString());
+    localStorage.setItem('last_pray_date', todayStr);
     localStorage.setItem('pray_streak', streak.toString());
 
+    // 기도 온도 계산 (기본 36.5도 + 연속 1일당 2.5도 상승, 최대 100도)
     let temp = 36.5 + ((streak - 1) * 2.5);
     temp = Math.min(100, temp);
 
