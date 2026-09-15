@@ -154,7 +154,19 @@
       background-color: #FEE2E2; padding: 2px 4px; border-radius: 4px;
       white-space: nowrap;
     }
-
+    /* 로딩 스켈레톤 애니메이션 */
+    .skeleton-card {
+      background: #EAE5DE;
+      border-radius: 12px;
+      height: 52px;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 0.5; }
+      50% { opacity: 1; }
+      100% { opacity: 0.5; }
+    }
     .member-count { font-size: 12px; color: var(--text-sub); background: var(--bg); padding: 3px 6px; border-radius: 8px; flex-shrink: 0; }
 
     /* 상세 화면 및 그룹 박스 */
@@ -328,15 +340,40 @@
   const tempDisplay = document.getElementById('temp-display');
   const tempBar = document.getElementById('temp-bar');
 
+ // 1. 페이지 시작 시 스켈레톤 카드를 먼저 렌더링
+  function renderSkeleton() {
+    memberGrid.innerHTML = '';
+    for (let i = 0; i < 8; i++) {
+      const skel = document.createElement('div');
+      skel.className = 'skeleton-card';
+      memberGrid.appendChild(skel);
+    }
+  }
+
+  // 2. 캐시를 활용한 빠른 데이터 로딩
   async function loadData() {
+    // A. 기존 저장된 캐시가 있다면 즉시 화면에 표시 (0초 대기)
+    const cachedData = localStorage.getItem('cached_prayer_tsv');
+    if (cachedData) {
+      parseTSVData(cachedData);
+    } else {
+      renderSkeleton(); // 캐시 없으면 로딩 스켈레톤 표시
+    }
+
+    // B. 백그라운드에서 최신 데이터 가져와서 업데이트
     try {
       const response = await fetch(TSV_URL);
       if (!response.ok) throw new Error("네트워크 응답 오류");
       const tsvText = await response.text();
+      
+      // 최신 데이터 캐시 저장 및 화면 갱신
+      localStorage.setItem('cached_prayer_tsv', tsvText);
       parseTSVData(tsvText);
     } catch (error) {
       console.error(error);
-      showModal("연동 오류", "구글 시트 데이터를 불러오지 못했습니다.");
+      if (!cachedData) {
+        showModal("연동 오류", "구글 시트 데이터를 불러오지 못했습니다.");
+      }
     }
   }
 
