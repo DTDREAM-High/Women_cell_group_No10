@@ -3,7 +3,7 @@
   "short_name": "다락방기도",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#F9F6F0",
+  "background_color": "#ffffff",
   "theme_color": "#E87A5D",
   "icons": [
     {
