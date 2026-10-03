@@ -122,12 +122,11 @@
       display: flex; 
       align-items: center; 
       gap: 6px; 
-      flex-wrap: wrap; /* 그리드 파손 방지 */
+      flex-wrap: wrap;
       flex: 1;
       min-width: 0;
     }
     
-    /* 💡 메인 화면 이름 크기  */
     .member-name { 
       font-size: 17px; 
       font-weight: 700; 
@@ -148,13 +147,12 @@
       white-space: nowrap;
     }
     
-    /* 🚨 카드 전용 우선 뱃지 */
     .badge-urgent-card {
       font-size: 10px; font-weight: 700; color: var(--urgent-red);
       background-color: #FEE2E2; padding: 2px 4px; border-radius: 4px;
       white-space: nowrap;
     }
-    /* 로딩 스켈레톤 애니메이션 */
+    
     .skeleton-card {
       background: #EAE5DE;
       border-radius: 12px;
@@ -176,11 +174,15 @@
     .btn-back svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
     .current-member-title { font-size: 22px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 6px; }
     .current-member-title svg { width: 24px; height: 24px; fill: none; stroke-width: 2; }
-.prayer-text, 
-.modal-body, 
-.member-detail { 
-  white-space: pre-line; /* \n (줄바꿈)을 브라우저 화면의 줄바꿈으로 자동 변환 */
-}
+
+    /* \n (줄바꿈)을 화면의 실제 줄바꿈으로 자동 표시해주는 CSS */
+    .prayer-text, 
+    .modal-body, 
+    .member-detail,
+    .prayer-detail { 
+      white-space: pre-line; 
+    }
+
     .group-tag {
       display: inline-block; font-size: 13px; font-weight: 700;
       color: var(--primary); background-color: var(--primary-light);
@@ -210,7 +212,7 @@
     
     .prayer-title-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .prayer-title { font-size: 18px; font-weight: 700; color: var(--text-main); }
-    .prayer-detail { font-size: 16px; color: var(--text-sub); line-height: 1.55; white-space: pre-line; margin-top: 6px; }
+    .prayer-detail { font-size: 16px; color: var(--text-sub); line-height: 1.55; margin-top: 6px; }
 
     /* 완료 항목 아코디언 */
     .prayer-item.is-done { opacity: 0.75; }
@@ -244,7 +246,7 @@
     .modal-icon { width: 48px; height: 48px; background-color: var(--primary-light); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
     .modal-icon svg { width: 24px; height: 24px; stroke: var(--primary); fill: none; stroke-width: 2; }
     .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
-    .modal-desc { font-size: 15px; color: var(--text-sub); line-height: 1.4; margin-bottom: 18px; }
+    .modal-desc { font-size: 15px; color: var(--text-sub); line-height: 1.4; margin-bottom: 18px; white-space: pre-line; }
     .btn-modal-close { width: 100%; padding: 12px; border: none; background-color: var(--primary); color: white; font-size: 16px; font-weight: 700; border-radius: 12px; cursor: pointer; }
 
     /* 확대 모드 시 적용할 크기 */
@@ -344,7 +346,7 @@
   const tempDisplay = document.getElementById('temp-display');
   const tempBar = document.getElementById('temp-bar');
 
-// 1. 데이터 로딩 중 보여줄 스켈레톤(UI 뼈대) 생성 함수
+  // 1. 스켈레톤(UI 뼈대) 표시
   function renderSkeleton() {
     memberGrid.innerHTML = '';
     for (let i = 0; i < 8; i++) {
@@ -354,23 +356,20 @@
     }
   }
 
-  // 2. 캐시 우선 표시 + 데이터 변경 시에만 화면 갱신하는 loadData 함수
+  // 2. 캐시 우선 표시 및 데이터 로딩
   async function loadData() {
-    // A. 저장된 캐시가 있으면 즉시(0초) 화면에 표시
     const cachedData = localStorage.getItem('cached_prayer_tsv');
     if (cachedData) {
       parseTSVData(cachedData);
     } else {
-      renderSkeleton(); // 캐시가 전혀 없으면 스켈레톤 카드 표시
+      renderSkeleton();
     }
 
-    // B. 백그라운드에서 구글 시트 최신 데이터 가져오기
     try {
       const response = await fetch(TSV_URL);
       if (!response.ok) throw new Error("네트워크 응답 오류");
       const tsvText = await response.text();
       
-      // 💡 데이터가 새로 바뀌었을 때만 캐시를 업데이트하고 화면을 다시 렌더링 (깜빡임 방지)
       if (tsvText !== cachedData) {
         localStorage.setItem('cached_prayer_tsv', tsvText);
         parseTSVData(tsvText);
@@ -383,6 +382,7 @@
     }
   }
 
+  // 3. TSV 데이터 파싱 (\n 텍스트 치환 적용)
   function parseTSVData(tsvText) {
     const lines = tsvText.split(/\r?\n/).map(line => line.trim()).filter(line => line);
     if (lines.length <= 1) return;
@@ -391,12 +391,19 @@
     for (let i = 1; i < lines.length; i++) {
       const cols = lines[i].split('\t');
       if (cols.length >= 2) {
+        // 💡 구글 시트에 문자로 입력된 '\n' 또는 '\\n'을 브라우저가 인식하는 줄바꿈 문자로 변경
+        let detailText = cols[4] ? cols[4].trim() : "";
+        detailText = detailText.replace(/\\n/g, '\n');
+
+        let titleText = cols[3] ? cols[3].trim() : "";
+        titleText = titleText.replace(/\\n/g, '\n');
+
         result.push({
           role: cols[0] ? cols[0].trim() : "순원",
           name: cols[1] ? cols[1].trim() : "",
           group: cols[2] ? cols[2].trim() : "기도제목",
-          title: cols[3] ? cols[3].trim() : "",
-          detail: cols[4] ? cols[4].trim() : "",
+          title: titleText,
+          detail: detailText,
           status: cols[5] ? cols[5].trim().toLowerCase() : "active"
         });
       }
@@ -425,7 +432,6 @@
     memberGrid.innerHTML = '';
     orderedMemberList.forEach(name => {
       const isLeader = rolesMap[name] === '순장';
-      // 🚨 우선 기도제목 포함 여부 확인
       const hasUrgent = prayerData[name].some(p => p.status === 'urgent' || p.status === '우선');
       
       memberGrid.appendChild(createMemberCard(name, isLeader, rolesMap[name], hasUrgent));
@@ -438,7 +444,6 @@
     card.className = `member-card ${isLeader ? 'is-leader' : ''}`;
     card.onclick = () => showDetailView(globalIndex);
     
-    // 💡 안전한 태그 정렬 구조 적용 (유연하게 줄바꿈됨)
     card.innerHTML = `
       <div class="member-info">
         <span class="member-name">${name}</span>
@@ -458,13 +463,12 @@
     const isLeader = rolesMap[name] === '순장';
 
     const iconSvg = isLeader 
- ? `<svg viewBox="0 0 24 24" style="fill:var(--leader-gold); stroke:var(--leader-gold); stroke-width:1;"><path d="M12 2l3.09 6.26 6.91 1.01-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`
-  : `<svg viewBox="0 0 24 24" style="stroke:var(--primary); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+      ? `<svg viewBox="0 0 24 24" style="fill:var(--leader-gold); stroke:var(--leader-gold); stroke-width:1;"><path d="M12 2l3.09 6.26 6.91 1.01-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`
+      : `<svg viewBox="0 0 24 24" style="stroke:var(--primary); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
     
     memberDetailName.innerHTML = `${iconSvg} ${name} ${isLeader ? '순장' : '순원'}`;
     
     const prayers = prayerData[name];
-    
     const urgentItems = prayers.filter(p => p.status === 'urgent' || p.status === '우선');
     const normalPrayers = prayers.filter(p => p.status !== 'urgent' && p.status !== '우선');
 
@@ -566,11 +570,10 @@
     showModal("글자 크기 변경", isLargeFont ? "글자 크기가 확대되었습니다." : "글자 크기가 기본으로 설정되었습니다.");
   }
 
-  // 접속 시 현재 기온 계산 및 표시
   function initTemperature() {
     const lastPrayDate = localStorage.getItem('last_pray_date');
     let streak = parseInt(localStorage.getItem('pray_streak') || '0');
-    let temp = 5; // 기본 5도
+    let temp = 5;
 
     if (lastPrayDate) {
       const today = new Date();
@@ -582,11 +585,9 @@
       const diffDays = Math.round((today - lastDate) / (1000 * 60 * 60 * 24));
 
       if (diffDays <= 1) {
-        // 어제 또는 오늘 기도함 -> 연속 체온 유지
         temp = 36.5 + ((streak - 1) * 2.5);
         temp = Math.min(100, temp);
       } else {
-        // 2일 이상 안 함 -> 온도가 다시 식음 (10도)
         temp = 10;
         localStorage.setItem('pray_streak', '0');
       }
@@ -594,16 +595,13 @@
     updateTempUI(temp);
   }
 
-  // 기도 참여 버튼 클릭 시
   function recordPrayer() {
     const now = new Date();
-    // YYYY-MM-DD 날짜 추출
     const todayStr = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
     
     const lastPrayDate = localStorage.getItem('last_pray_date');
     let streak = parseInt(localStorage.getItem('pray_streak') || '0');
 
-    // 이미 오늘 눌렀는지 체크 (날짜 기준)
     if (lastPrayDate === todayStr) {
       showModal("기도 완료", "오늘 이미 기도를 완료하셨습니다!\n내일 다시 참여해 주세요.");
       return;
@@ -617,22 +615,17 @@
       const diffDays = Math.round((todayObj - lastObj) / (1000 * 60 * 60 * 24));
 
       if (diffDays === 1) {
-        // 어제 누르고 오늘 또 누름 (연속 성공 -> streak 증가!)
         streak += 1;
       } else {
-        // 중간에 날짜를 거름 (연속 끊김 -> 1일차부터 재시작)
         streak = 1;
       }
     } else {
-      // 처음 누름
       streak = 1;
     }
 
-    // 기록 저장
     localStorage.setItem('last_pray_date', todayStr);
     localStorage.setItem('pray_streak', streak.toString());
 
-    // 온도 계산: 1일차 36.5도 / 2일차 39.0도 / 3일차 41.5도 ... (최대 100도)
     let temp = 36.5 + ((streak - 1) * 2.5);
     temp = Math.min(100, temp);
 
