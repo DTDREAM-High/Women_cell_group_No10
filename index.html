@@ -6,7 +6,7 @@
   <title>동탄드림교회 직장10여 다락방 기도수첩</title>
   
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" href="#E87A5D">
+  <meta name="theme-color" content="#E87A5D">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
@@ -55,6 +55,7 @@
       flex-direction: column;
       position: relative;
       box-shadow: 0 0 20px rgba(0,0,0,0.05);
+      touch-action: pan-y; /* 수직 스크롤 허용 및 가로 터치 제어 지원 */
     }
 
     header {
@@ -337,6 +338,12 @@
   let currentMemberIndex = 0;
   let isLargeFont = false;
 
+  // 스와이프 이벤트를 위한 좌표 변수
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchEndX = 0;
+  let touchEndY = 0;
+
   const tempCard = document.getElementById('temp-card');
   const mainView = document.getElementById('main-view');
   const detailView = document.getElementById('detail-view');
@@ -391,7 +398,6 @@
     for (let i = 1; i < lines.length; i++) {
       const cols = lines[i].split('\t');
       if (cols.length >= 2) {
-        // 💡 구글 시트에 문자로 입력된 '\n' 또는 '\\n'을 브라우저가 인식하는 줄바꿈 문자로 변경
         let detailText = cols[4] ? cols[4].trim() : "";
         detailText = detailText.replace(/\\n/g, '\n');
 
@@ -457,10 +463,15 @@
     return card;
   }
 
-  function showDetailView(index) {
+  function showDetailView(index, pushHistory = true) {
     currentMemberIndex = index;
     const name = orderedMemberList[currentMemberIndex];
     const isLeader = rolesMap[name] === '순장';
+
+    // 모바일 뒤로가기 버튼 처리를 위한 히스토리 상태 추가
+    if (pushHistory) {
+      history.pushState({ view: 'detail' }, '', '');
+    }
 
     const iconSvg = isLeader 
       ? `<svg viewBox="0 0 24 24" style="fill:var(--leader-gold); stroke:var(--leader-gold); stroke-width:1;"><path d="M12 2l3.09 6.26 6.91 1.01-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`
@@ -557,17 +568,57 @@
     tempCard.style.display = 'block';
   }
 
+  function handleBackAction() {
+    // 히스토리 상태가 세팅되어 있을 때 뒤로가기를 호출하여 popstate 이벤트와 연동
+    if (history.state && history.state.view === 'detail') {
+      history.back();
+    } else {
+      showMainView();
+    }
+  }
+
   function navigateMember(direction) {
     currentMemberIndex += direction;
     if (currentMemberIndex < 0) currentMemberIndex = orderedMemberList.length - 1;
     if (currentMemberIndex >= orderedMemberList.length) currentMemberIndex = 0;
-    showDetailView(currentMemberIndex);
+    // 이전/다음 순원 이동 시에는 새로운 히스토리를 쌓지 않고 화면만 변경
+    showDetailView(currentMemberIndex, false);
   }
 
   function toggleFontSize() {
     isLargeFont = !isLargeFont;
     document.body.classList.toggle('font-large', isLargeFont);
     showModal("글자 크기 변경", isLargeFont ? "글자 크기가 확대되었습니다." : "글자 크기가 기본으로 설정되었습니다.");
+  }
+
+  /* 4. 스와이프 감지 기능 */
+  function initSwipeGesture() {
+    detailView.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    detailView.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      touchEndY = e.changedTouches[0].screenY;
+      handleSwipe();
+    }, { passive: true });
+  }
+
+  function handleSwipe() {
+    const diffX = touchEndX - touchStartX;
+    const diffY = touchEndY - touchStartY;
+
+    // 수평 스와이프 거리가 수직 이동 거리보다 크고, 일정 임계값(50px) 이상 이동했을 때만 실행
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+      if (diffX < 0) {
+        // 왼쪽으로 스와이프 -> 다음 순원
+        navigateMember(1);
+      } else {
+        // 오른쪽으로 스와이프 -> 이전 순원
+        navigateMember(-1);
+      }
+    }
   }
 
   function initTemperature() {
@@ -651,8 +702,17 @@
   window.addEventListener('DOMContentLoaded', () => {
     initTemperature();
     loadData();
+    initSwipeGesture();
 
-    document.getElementById('btn-back').addEventListener('click', showMainView);
+    // 모바일 뒤로가기 버튼(하단 이전 버튼) 이벤트 감지
+    window.addEventListener('popstate', (e) => {
+      // 히스토리 상태가 없으면 메인 뷰 표시
+      if (!e.state || e.state.view !== 'detail') {
+        showMainView();
+      }
+    });
+
+    document.getElementById('btn-back').addEventListener('click', handleBackAction);
     document.getElementById('btn-prev').addEventListener('click', () => navigateMember(-1));
     document.getElementById('btn-next').addEventListener('click', () => navigateMember(1));
     document.getElementById('btn-font-toggle').addEventListener('click', toggleFontSize);
